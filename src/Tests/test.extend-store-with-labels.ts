@@ -116,8 +116,7 @@ describe('extend-store-with-labels', () => {
 		const chatMutations = getSampleProtoActions() as DumpedLogChatMutation[]
 		store.bind(ev)
 
-		// WRONG!! in-memory-store doesn't get updates
-		// FIXME POTENTIAL_ENDLESS_LOOP
+		// when ev.buffer() invoked, in-memory-store will get updates via re-emitted
 		ev.buffer()
 		for (const chatMutation of chatMutations) {
 			console.warn(JSON.stringify(chatMutation.syncAction, null, 2))
@@ -129,9 +128,7 @@ describe('extend-store-with-labels', () => {
 				logger
 			)
 		}
-		// WRONG!! in-memory-store doesn't get updates
-		// FIXME POTENTIAL_ENDLESS_LOOP
-		ev.flush()
+		ev.flush() // consolidateEvents() fires 'labelsById.set' and 'labelIdsForContact.set'
 
 		store.writeToFile('./TestData/WITH_LABELS_baileys_store_multi.json')
 	})

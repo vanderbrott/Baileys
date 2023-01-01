@@ -26,10 +26,13 @@ const msgRetryCounterMap: MessageRetryMap = {}
 // can be written out to a file & read from it
 const store = useStore ? makeInMemoryStore({ logger }) : undefined
 store?.readFromFile('./baileys_store_multi.json')
-// save every 10s
-setInterval(() => {
-	store?.writeToFile('./baileys_store_multi.json')
-}, 10_000)
+if (store) {
+	// save every 10s
+	setInterval(() => {
+		logger.warn(`store?.writeToFile() NOW`)
+		store?.writeToFile('./baileys_store_multi.json')
+	}, 10_000)
+}
 
 // start a connection
 const startSock = async () => {

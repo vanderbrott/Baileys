@@ -946,7 +946,7 @@ export const processSyncAction = (
 			predefinedId: action?.labelEditAction?.predefinedId,
 			name: action?.labelEditAction?.name,
 			color: action?.labelEditAction?.color,
-			deleted: action?.labelEditAction?.deleted,
+			deleted: action?.labelEditAction?.deleted || false,
 		}
 		ev.emit('label.edit', label)
 	} else if (action?.labelAssociationAction || type === 'deleteChat') {

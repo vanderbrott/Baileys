@@ -74,9 +74,11 @@ export type BaileysEventMap = {
 	/** Receive an update on a call, including when the call was received, rejected, accepted */
 	call: WACallEvent[]
 
-	// vanderbrott's extensions
+	// vanderbrott's extensions: on syncAction => buffered
 	'label.edit': Label
 	'label.association': LabelAssocAction
+	'labelsById.set': OneToOne<number, Label>
+	'labelIdsForContact.set': ManyToOne<string, number>
 }
 
 export type BufferedEventData = {
@@ -84,8 +86,6 @@ export type BufferedEventData = {
 		chats: { [jid: string]: Chat }
 		contacts: { [jid: string]: Contact }
 		messages: { [uqId: string]: WAMessage }
-		labelsById: OneToOne<number, Label>
-		labelIdsForContact: ManyToOne<string, number>
 		empty: boolean
 		isLatest: boolean
 	}
@@ -106,6 +106,8 @@ export type BufferedEventData = {
 		[key: string]: { key: WAMessageKey; userReceipt: proto.IUserReceipt[] }
 	}
 	groupUpdates: { [jid: string]: Partial<GroupMetadata> }
+	labelsById: OneToOne<number, Label>
+	labelIdsForContact: ManyToOne<string, number>
 }
 
 export type BaileysEvent = keyof BaileysEventMap

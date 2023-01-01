@@ -31,7 +31,8 @@ const BUFFERABLE_EVENT = [
 	'messages.reaction',
 	'message-receipt.update',
 	'groups.update',
-	'label.edit',
+
+	'label.edit', // will be put into data.* AND re-emitted via 'event' for in-memory-store
 	'label.association',
 ] as const
 
@@ -186,10 +187,6 @@ const makeBufferData = (): BufferedEventData => {
 			chats: {},
 			messages: {},
 			contacts: {},
-			labelsById: new OneToOne('labelsById/BufferedEventData'),
-			labelIdsForContact: new ManyToOne(
-				'labelIdsForContact/BufferedEventData'
-			),
 			isLatest: false,
 			empty: true,
 		},
@@ -204,6 +201,10 @@ const makeBufferData = (): BufferedEventData => {
 		messageDeletes: {},
 		messageReceipts: {},
 		groupUpdates: {},
+		labelsById: new OneToOne('labelsById/BufferedEventData'),
+		labelIdsForContact: new ManyToOne(
+			'labelIdsForContact/BufferedEventData'
+		),
 	}
 }
 
@@ -254,14 +255,6 @@ function append<E extends BufferableEvent>(
 					historyCache.add(key)
 				}
 			}
-
-			data.historySets.labelsById = (
-				eventData.labelsById as OneToOne<number, Label>
-			).clone()
-
-			data.historySets.labelIdsForContact = (
-				eventData.labelIdsForContact as ManyToOne<string, number>
-			).clone()
 
 			data.historySets.empty = false
 			data.historySets.isLatest =
@@ -559,7 +552,7 @@ function append<E extends BufferableEvent>(
 			// if (newLabel.deleted) {
 			// 	just delete from labelsById?...
 			// }
-			data.historySets.labelsById.putIfAbsent(
+			data.labelsById.putIfAbsent(
 				(label) => label.predefinedId || -1,
 				label
 			)
@@ -568,12 +561,12 @@ function append<E extends BufferableEvent>(
 		case 'label.association':
 			const labelAssoc: LabelAssocAction = eventData
 			if (labelAssoc.assign) {
-				data.historySets.labelIdsForContact.appendValueForKey(
+				data.labelIdsForContact.appendValueForKey(
 					labelAssoc.contactName,
 					labelAssoc.labelPredefinedId
 				)
 			} else {
-				data.historySets.labelIdsForContact.removeValueForKey(
+				data.labelIdsForContact.removeValueForKey(
 					labelAssoc.contactName,
 					labelAssoc.labelPredefinedId
 				)
@@ -630,16 +623,14 @@ function consolidateEvents(data: BufferedEventData) {
 	const map: BaileysEventData = {}
 
 	// FIXME POTENTIAL_ENDLESS_LOOP
-	// if (!data.historySets.empty) {
-	map['messaging-history.set'] = {
-		chats: Object.values(data.historySets.chats),
-		messages: Object.values(data.historySets.messages),
-		contacts: Object.values(data.historySets.contacts),
-		labelsById: data.historySets.labelsById.clone(),
-		labelIdsForContact: data.historySets.labelIdsForContact.clone(),
-		isLatest: data.historySets.isLatest,
+	if (!data.historySets.empty) {
+		map['messaging-history.set'] = {
+			chats: Object.values(data.historySets.chats),
+			messages: Object.values(data.historySets.messages),
+			contacts: Object.values(data.historySets.contacts),
+			isLatest: data.historySets.isLatest,
+		}
 	}
-	// }
 
 	const chatUpsertList = Object.values(data.chatUpserts)
 	if (chatUpsertList.length) {
@@ -704,6 +695,14 @@ function consolidateEvents(data: BufferedEventData) {
 	const groupUpdateList = Object.values(data.groupUpdates)
 	if (groupUpdateList.length) {
 		map['groups.update'] = groupUpdateList
+	}
+
+	if (data.labelsById.size > 0) {
+		map['labelsById.set'] = data.labelsById.clone() // shallow copy to avoid NPE while async insert/delete
+	}
+
+	if (data.labelIdsForContact.size > 0) {
+		map['labelIdsForContact.set'] = data.labelIdsForContact.clone() // shallow copy to avoid NPE while async insert/delete
 	}
 
 	return map

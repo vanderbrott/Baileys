@@ -156,9 +156,14 @@ export default ({ logger: _logger, chatKey }: BaileysInMemoryStoreConfig) => {
 
 				if (newLabelsById) {
 					labelsById = newLabelsById.clone()
+				} else {
+					console.error(`no newLabelsById`)
 				}
+
 				if (newLabelIdsForContact) {
 					labelIdsForContact = newLabelIdsForContact.clone()
+				} else {
+					console.error(`no newLabelIdsForContact`)
 				}
 			}
 		)
@@ -320,6 +325,8 @@ export default ({ logger: _logger, chatKey }: BaileysInMemoryStoreConfig) => {
 				}
 			}
 		})
+
+		// when ev.buffer() was NOT invoked - I'm a single listener => append to store.vars
 		ev.on('label.edit', (newLabel: Label) => {
 			// if (newLabel.deleted) {
 			// 	just delete from labelsById?...
@@ -342,6 +349,23 @@ export default ({ logger: _logger, chatKey }: BaileysInMemoryStoreConfig) => {
 				)
 			}
 		})
+
+		// when ev.buffer() is ON (also because of BUFFERABLE_EVENT_SET)
+		// I'll receive whole buffered MAPs re-emitted =>
+		// just set the received .clone()s into in-memory-store
+		ev.on(
+			'labelsById.set',
+			(bufferedLabelById_CLONE: OneToOne<number, Label>) => {
+				labelsById = bufferedLabelById_CLONE
+			}
+		)
+
+		ev.on(
+			'labelIdsForContact.set',
+			(bufferedLabelIdsForContact_CLONE: ManyToOne<string, number>) => {
+				labelIdsForContact = bufferedLabelIdsForContact_CLONE
+			}
+		)
 	}
 
 	const toJSON = () => ({

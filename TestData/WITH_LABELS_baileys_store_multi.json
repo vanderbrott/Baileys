@@ -30,21 +30,12 @@
       "lastMessageRecvTimestamp": 0
     },
     {
-      "id": "79870852993@s.whatsapp.net",
-      "conversationTimestamp": 1672267688,
-      "unreadCount": 1
-    },
-    {
       "participant": [],
       "id": "79166774509@s.whatsapp.net",
       "unreadCount": 0,
       "readOnly": false,
       "ephemeralExpiration": 0,
-      "conversationTimestamp": {
-        "low": 1672264354,
-        "high": 0,
-        "unsigned": true
-      },
+      "conversationTimestamp": 1672604588,
       "notSpam": true,
       "disappearingMode": {
         "initiator": "CHANGED_IN_CHAT"
@@ -116,6 +107,11 @@
           }
         }
       ]
+    },
+    {
+      "id": "79870852993@s.whatsapp.net",
+      "conversationTimestamp": 1672267688,
+      "unreadCount": 1
     }
   ],
   "contacts": {},
@@ -149,6 +145,34 @@
             "playedTimestamp": "0"
           }
         ]
+      },
+      {
+        "key": {
+          "remoteJid": "79166774509@s.whatsapp.net",
+          "fromMe": true,
+          "id": "A9F18487AA16227BC561EC80AC31469E"
+        },
+        "message": {
+          "conversation": "archive"
+        },
+        "messageTimestamp": "1672604505",
+        "status": "READ",
+        "pushName": "SquareOne Signals",
+        "verifiedBizName": "SquareOne Signals"
+      },
+      {
+        "key": {
+          "remoteJid": "79166774509@s.whatsapp.net",
+          "fromMe": true,
+          "id": "FB1C8878682C0B04524C79A7EACAB490"
+        },
+        "message": {
+          "conversation": "archive"
+        },
+        "messageTimestamp": "1672604588",
+        "status": "READ",
+        "pushName": "SquareOne Signals",
+        "verifiedBizName": "SquareOne Signals"
       }
     ],
     "79870852993@s.whatsapp.net": [
