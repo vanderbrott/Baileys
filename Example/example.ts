@@ -128,6 +128,31 @@ const startSock = async () => {
 				)
 			}
 
+			if (events['labelsById.set']) {
+				const labelsById = events['labelsById.set']
+				console.log(`labelsById ${labelsById.size}`, labelsById)
+			}
+
+			if (events['label.edit']) {
+				const labelEdit = events['label.edit']
+				console.log(`labelEdit ${labelEdit.name}`)
+			}
+
+			if (events['labelIdsForContact.set']) {
+				const labelIdsForContact = events['labelIdsForContact.set']
+				console.log(
+					`labelIdsForContact ${labelIdsForContact.size}`,
+					labelIdsForContact
+				)
+			}
+
+			if (events['label.association']) {
+				const labelAssociation = events['label.association']
+				console.log(
+					`labelAssociation ${labelAssociation.contactName}  ${labelAssociation.labelPredefinedId}  ${labelAssociation.assign}`
+				)
+			}
+
 			// received a new message
 			if (events['messages.upsert']) {
 				const upsert = events['messages.upsert']
@@ -143,6 +168,20 @@ const startSock = async () => {
 							await sock!.readMessages([msg.key])
 							await sendMessageWTyping(
 								{ text: 'Hello there!' },
+								msg.key.remoteJid!
+							)
+						}
+						if (msg.message?.conversation === 'getLabels') {
+							const personLabel =
+								store?.getLabels(
+									msg.key?.remoteJid || 'NO_REMOTE_JID'
+								) || 'NO_STORE'
+							console.log(
+								`getLabels(): ${personLabel}`,
+								msg.key.remoteJid
+							)
+							await sendMessageWTyping(
+								{ text: personLabel },
 								msg.key.remoteJid!
 							)
 						}

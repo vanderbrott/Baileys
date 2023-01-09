@@ -406,6 +406,36 @@ export default ({ logger: _logger, chatKey }: BaileysInMemoryStoreConfig) => {
 		labelIdsForContact.fillFromJsonMap(json.labelsForContact)
 	}
 
+	const getLabels = (
+		remoteJid?: string,
+		separator: string = ', '
+	): string => {
+		if (!remoteJid) {
+			return 'getLabels(): no remoteJid'
+		}
+
+		const labelIds: number[] | undefined = labelIdsForContact.get(remoteJid)
+		if (!labelIds) {
+			return `getLabels(): no labelIds for remoteJid=[${remoteJid}]`
+		}
+
+		const rightJoined: ManyToOne<string, string> = labelIdsForContact
+			.filter((key) => key === remoteJid)
+			.rightJoin(
+				Array.from(labelsById.entries()),
+				(labelIdName) => labelIdName[0],
+				(labelIdName) =>
+					labelIdName[1].name ||
+					`UNKNOWN_NAME_FOR_LABEL ${JSON.stringify(labelIdName)}`
+			)
+		const ret = rightJoined.values()
+		return Array.from(ret).join(separator)
+	}
+
+	const setLabels = () => {
+		throw 'setLabels() NotYetImplemented'
+	}
+
 	return {
 		chats,
 		contacts,
@@ -512,5 +542,7 @@ export default ({ logger: _logger, chatKey }: BaileysInMemoryStoreConfig) => {
 				fromJSON(json as JsonFile)
 			}
 		},
+		getLabels,
+		setLabels,
 	}
 }

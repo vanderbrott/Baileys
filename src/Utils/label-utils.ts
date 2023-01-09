@@ -160,26 +160,43 @@ export class ManyToOne<K, V> extends Map<K, V[]> {
 		return ret
 	}
 
-	rightJoin<TLeft, TRight>(
-		leftTable: TLeft[],
-		getLeftKey: (row: TLeft) => K,
-		rightTable: TRight[],
-		getRightKey: (row: TRight) => V
-	): ManyToOne<TLeft, TRight> {
-		const ret: ManyToOne<TLeft, TRight> = new ManyToOne(
-			`${this.whatsInside}.rightJoined`
+	filter(
+		keysFilter?: (key: K) => boolean,
+		valuesFilter?: (value: V) => boolean
+	): ManyToOne<K, V> {
+		const ret: ManyToOne<K, V> = new ManyToOne<K, V>(
+			`${this.whatsInside}.filtered`
 		)
-		for (const leftRow of leftTable) {
-			const leftKey: K = getLeftKey(leftRow)
-			const rightKeysFoundInLookup = this.get(leftKey)
-			if (!rightKeysFoundInLookup) {
+		for (const row of this.entries()) {
+			const [key, values] = row
+			if (keysFilter && !keysFilter(key)) {
 				continue
 			}
+			const valuesFiltered: V[] = valuesFilter
+				? values.filter(valuesFilter)
+				: [...values]
+			ret.set(key, valuesFiltered)
+		}
+
+		return ret
+	}
+
+	rightJoin<TRight, FRight>(
+		rightTable: TRight[],
+		getRightKey: (row: TRight) => V,
+		pickRightField: (row: TRight) => FRight
+	): ManyToOne<K, FRight> {
+		const ret: ManyToOne<K, FRight> = new ManyToOne(
+			`${this.whatsInside}.rightJoined`
+		)
+		for (const leftRow of this.entries()) {
+			const [leftKey, leftValues] = leftRow
 
 			const rightRowsResolved: TRight[] = rightTable.filter((rightRow) =>
-				rightKeysFoundInLookup.includes(getRightKey(rightRow))
+				leftValues.includes(getRightKey(rightRow))
 			)
-			ret.set(leftRow, rightRowsResolved)
+			const rightFields = rightRowsResolved.map(pickRightField)
+			ret.set(leftKey, rightFields)
 		}
 
 		return ret

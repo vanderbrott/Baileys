@@ -949,7 +949,7 @@ export const processSyncAction = (
 			deleted: action?.labelEditAction?.deleted || false,
 		}
 		ev.emit('label.edit', label)
-	} else if (action?.labelAssociationAction || type === 'deleteChat') {
+	} else if (action?.labelAssociationAction || type === 'label_jid') {
 		const assigned =
 			action?.labelAssociationAction?.labeled === true || false
 		const labelAssoc: LabelAssocAction = {
